@@ -26,7 +26,7 @@
               </div>
 
               <div class="before-encoding">
-                  変換前
+                  変換前 ※アルファベットA-Zとピリオドのみ対応しています。
                 <div class="content">
                   <textarea type="text", rows="3", cols="60" id="input">PONYSRUS.</textarea>
                 </div>
@@ -54,10 +54,6 @@
                 </div>
               </div>
             </div>
-
-          <footer>
-              <small>ぽにぽに.</small>
-          </footer>
         </div>
 
         <style>
@@ -66,10 +62,18 @@
         *{
             margin-left: 5px;
             padding: 0;
+            font-size: 16px;
+
         }
 
         body{
             font-family: "Open Sans","ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,"MS Pゴシック",sans-serif;
+        }
+
+        @media screen and(min-width: 634px), print{
+            wrap{
+              font-size: 16px;
+            }
         }
         </style>
 
@@ -87,9 +91,25 @@
 
             function test(){
               var input_str = (document.getElementById("input").value).toUpperCase()
+              if(!exist_illegal_char_before_cnv(input_str)){
+                alert("変換できない文字が含まれています。")
+                return
+              }
               var conv_id = convert_mls_signal(input_str)
               var conv_alt = convert_Alternative(conv_id, make_mapping_array())
               document.getElementById("output").value = conv_alt
+            }
+
+            // 不正文字チェック
+            function exist_illegal_char_before_cnv(str_){
+              if(str_.match(/^[A-Z.]*$/))
+              {
+                return true
+              }
+              else
+              {
+                  return false
+              }
             }
 
             // モースル信号符号化用の仮想配列を作成する関数です
