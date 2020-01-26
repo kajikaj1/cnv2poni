@@ -33,10 +33,6 @@
 
               </div>
 
-              <div cnv-btn>
-                <button type="button" name="cvt_btn" onClick="test()">符号化↓</button>
-              </div>
-
               <div class="delimiter-option">
                 区切り文字
                 <div class="delimiter-ckbox">
@@ -47,12 +43,21 @@
                 ※すべてにチェックがない場合は半角スペースで固定になります。
               </div>
 
-              <div class="after-encogin">
+              <div class=cnv-btn>
+                <button type="button" name="cvt_btn" onClick="convert_poniponi()">符号化↓</button>
+              </div>
+
+              <div class="after-encoging">
                 変換後
                 <div class="content">
                   <textarea type="text" display:block rows="5" cols="60" id="output"></textarea>
                 </div>
               </div>
+
+              <div class=cpy-btn>
+                <button type="button" name="cpy_btn()" onClick="copy2clipborad()">クリップボードにコピー</button>
+              </div>
+
             </div>
         </div>
 
@@ -79,6 +84,30 @@
             font-family: "Open Sans","ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,"MS Pゴシック",sans-serif;
         }
 
+        header{
+          margin-bottom: 15px;
+        }
+
+        .cnv-string{
+          margin-bottom: 15px;
+        }
+
+        .before-encoding{
+          margin-bottom: 15px;
+        }
+
+        .delimiter-option{
+          margin-bottom: 15px;
+        }
+
+        .cnv-btn{
+          margin-bottom: 20px;
+        }
+
+        .after-encoging{
+          margin-bottom: 15px;
+        }
+
         /*
         @media screen and (min-width: 800px){
           #dots{
@@ -97,8 +126,9 @@
         </style>
 
         <script>
+
           // モールス信号に変換するための連想配列
-          var mls_signal = {'A':"12", 'B':"2111", 'C':"2121", 'D':"211", 'E':"1",
+          var mrs_signal = {'A':"12", 'B':"2111", 'C':"2121", 'D':"211", 'E':"1",
                     'F':"1121", 'G':"221", 'H':"1111", 'I':"11", 'J':"1222",
                     'K':"212", 'L':"1211", 'M':"22", 'N':"21", 'O':"222",
                     'P':"1221", 'Q':"2212", 'R':"121", 'S':"111", 'T':"2",
@@ -108,84 +138,91 @@
           // モールス信号変換後の連想配列
           var delimiter = {'0':" ", '1':"!", '2':"っ"}
 
-            function test(){
-              var input_str = (document.getElementById("input").value).toUpperCase()
-              if(!exist_illegal_char_before_cnv(input_str)){
-                alert("変換できない文字が含まれています。")
-                return
-              }
-              var conv_id = convert_mls_signal(input_str)
-              var conv_alt = convert_Alternative(conv_id, make_mapping_array())
-              document.getElementById("output").value = conv_alt
+          function copy2clipborad(){
+            var text = document.getElementById("output")
+            text.select()
+            console.log(text)
+            document.execCommand("copy")
+          }
+
+          function convert_poniponi(){
+            var input_str = (document.getElementById("input").value).toUpperCase()
+            if(!exist_illegal_char_before_cnv(input_str)){
+              alert("変換できない文字が含まれています。")
+              return
+            }
+            var conv_id = convert_mrs_signal(input_str)
+            var conv_alt = convert_Alternative(conv_id, make_mapping_array())
+            document.getElementById("output").value = conv_alt
+          }
+
+          // 不正文字チェック
+          function exist_illegal_char_before_cnv(str_){
+            if(str_.match(/^[A-Z.]*$/))
+            {
+              return true
+            }
+            else
+            {
+                return false
+            }
+          }
+
+          // モースル信号符号化用の仮想配列を作成する関数です
+          function make_mapping_array(){
+            var poniponi = {}
+            poniponi["1"] = document.getElementById("dots").value
+            poniponi["2"] = document.getElementById("dashes").value
+            poniponi["3"] = document.getElementById("period").value
+            return poniponi
+          }
+
+          // モールス信号に符号化する関数です
+          function convert_mrs_signal(str){
+            var str_cnv = str
+            for (let key in mrs_signal){
+              var re = new RegExp(key, "g")
+              str_cnv = str_cnv.replace(re, mrs_signal[key] +"0")
+            }
+            return str_cnv
+          }
+
+          // 符号化後の文字列を変換する関数です
+          function convert_Alternative(str, dict){
+            var str_cnv = str
+            for (let key in dict){
+              var re = new RegExp(key, "g")
+              str_cnv = str_cnv.replace(re, dict[key])
             }
 
-            // 不正文字チェック
-            function exist_illegal_char_before_cnv(str_){
-              if(str_.match(/^[A-Z.]*$/))
-              {
-                return true
-              }
-              else
-              {
-                  return false
-              }
+            // 区切り文字を作成します
+            var delimiters = []
+            var ckBox_deli = document.getElementsByClassName("delimiters")
+
+            for (var i=0; i<ckBox_deli.length; i++)
+            {
+                if(ckBox_deli[i].checked){
+                  delimiters.push(ckBox_deli[i].value);
+                }
             }
 
-            // モースル信号符号化用の仮想配列を作成する関数です
-            function make_mapping_array(){
-              var poniponi = {}
-              poniponi["1"] = document.getElementById("dots").value
-              poniponi["2"] = document.getElementById("dashes").value
-              poniponi["3"] = document.getElementById("period").value
-              return poniponi
+            if (delimiters.length <= 0)
+            {
+              delimiters.push(" ")
+            }
+            var idx = 0
+            while((idx = str_cnv.indexOf('0')) >= 0)
+            {
+              str_cnv = str_cnv.replace('0', delimiters[get_random_int(delimiters.length)])
             }
 
-            // モールス信号に符号化する関数です
-            function convert_mls_signal(str){
-              var str_cnv = str
-              for (let key in mls_signal){
-                var re = new RegExp(key, "g")
-                str_cnv = str_cnv.replace(re, mls_signal[key] +"0")
-              }
-              return str_cnv
-            }
+            return str_cnv.trim()
+          }
 
-            // 符号化後の文字列を変換する関数です
-            function convert_Alternative(str, dict){
-              var str_cnv = str
-              for (let key in dict){
-                var re = new RegExp(key, "g")
-                str_cnv = str_cnv.replace(re, dict[key])
-              }
-
-              // 区切り文字を作成します
-              var delimiters = []
-              var ckBox_deli = document.getElementsByClassName("delimiters")
-
-              for (var i=0; i<ckBox_deli.length; i++)
-              {
-                  if(ckBox_deli[i].checked){
-                    delimiters.push(ckBox_deli[i].value);
-                  }
-              }
-
-              if (delimiters.length <= 0)
-              {
-                delimiters.push(" ")
-              }
-              var idx = 0
-              while((idx = str_cnv.indexOf('0')) >= 0)
-              {
-                str_cnv = str_cnv.replace('0', delimiters[get_random_int(delimiters.length)])
-              }
-
-              return str_cnv.trim()
-            }
-
-            // 0～max_valueまでの整数値をランダムに返す関数です
-            function get_random_int(max_value){
-              return parseInt(Math.random()*max_value)
-            }
+          // 0～max_valueまでの整数値をランダムに返す関数です
+          function get_random_int(max_value){
+            return parseInt(Math.random()*max_value)
+          }
 
 
         </script>
