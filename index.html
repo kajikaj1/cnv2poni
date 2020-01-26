@@ -63,8 +63,6 @@
 
         <style>
         @charset "UTF-8";
-
-
         *{
           margin-left: 5px;
           padding: 0;
@@ -78,6 +76,7 @@
         textarea{
           width:90%;
           border:2px solid black;
+          resize: none;
         }
 
         body{
@@ -86,6 +85,10 @@
 
         header{
           margin-bottom: 15px;
+        }
+
+        input{
+          margin-bottom: 5px;
         }
 
         .cnv-string{
@@ -108,21 +111,20 @@
           margin-bottom: 15px;
         }
 
-        /*
-        @media screen and (min-width: 800px){
-          #dots{
-            margin: auto;
-          }
+        .cpy-btn{
+          margin-bottom: 15px;
+        }
 
-          textarea{
-            width: 500px;
-          }
-
+        @media screen and (min-width: 720px){
           *{
               font-size: 16px;
           }
+
+          textarea{
+            width: 600px;
+            resize: none;
+          }
         }
-        */
         </style>
 
         <script>
@@ -223,8 +225,6 @@
           function get_random_int(max_value){
             return parseInt(Math.random()*max_value)
           }
-
-
         </script>
     </body>
 </html>
